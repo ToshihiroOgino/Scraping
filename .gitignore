@@ -4,8 +4,11 @@
 # Ignore Gradle build output directory
 build
 
+*.class
+**/bin
+
 out
-test_out
+out_test
 
 *.code-workspace
 .vscode

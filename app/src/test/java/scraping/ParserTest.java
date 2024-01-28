@@ -23,28 +23,28 @@ public class ParserTest {
         }
         Document nullDoc = null;
         try {
-            Parser instance1 = new Parser(nullDoc, "");
-            assertNotNull(
+            Parser instance1 = new Parser(nullDoc, "aaa");
+            assertEquals(
                     (String) method.invoke(instance1,
-                            "https://s.yimg.jp/images/kaleido/edit/202401/1/YxdwoMBaTk-FZ55WeuIxtQ.jpg"),
-                    "https/s.yimg.jp/images/kaleido/edit/202401/1/YxdwoMBaTk-FZ55WeuIxtQ.jpg");
-            assertNotNull(
+                            "https://s.yimg.jp/images/edit/202401/1/aaa.jpg"),
+                    "aaa/https/s.yimg.jp/images/edit/202401/1/aaa.jpg");
+            assertEquals(
                     (String) method.invoke(instance1, "a///b"),
-                    "a/b");
-            assertNotNull(
-                    (String) method.invoke(instance1, "a/////b"),
-                    "a/b");
+                    "aaa/a/b");
+            assertEquals(
+                    (String) method.invoke(instance1, "a////b"),
+                    "aaa/a/b");
 
             Parser instance2 = new Parser(nullDoc, "./a");
-            assertNotNull(
+            assertEquals(
                     (String) method.invoke(instance2, "b"),
-                    "a/b");
+                    "./a/b");
 
             Parser instance3 = new Parser(nullDoc, "./a/");
-            assertNotNull(
+            assertEquals(
                     (String) method.invoke(instance3, "b"),
                     "./a/b");
-            assertNotNull(
+            assertEquals(
                     (String) method.invoke(instance3, "https://aaa"),
                     "./a/https/aaa");
 

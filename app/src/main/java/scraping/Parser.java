@@ -5,8 +5,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.List;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 import org.jsoup.Jsoup;
 import org.jsoup.Connection.Response;
@@ -18,7 +18,8 @@ import com.google.common.base.Charsets;
 public class Parser {
     private Document doc;
     private String targetDirPath;
-    private List<CompletableFuture<Void>> futures = new LinkedList<CompletableFuture<Void>>();
+    private String targetHTMLPath;
+    private Queue<CompletableFuture<Void>> futures = new ArrayDeque<CompletableFuture<Void>>();
 
     /**
      * @param targetURL ダウンロードするWebページのURL
@@ -31,11 +32,7 @@ public class Parser {
             throw new RuntimeException(e);
         }
 
-        this.targetDirPath = targetDirPath.replace("\\", "/");
-        // 末尾を"/"にする
-        if (!this.targetDirPath.endsWith("/")) {
-            this.targetDirPath += "/";
-        }
+        initTarget(doc, targetDirPath);
     }
 
     /**
@@ -43,32 +40,19 @@ public class Parser {
      * @param targetDirPath 出力ディレクトリの絶対パス
      */
     public Parser(Document doc, String targetDirPath) {
-        this.doc = doc;
-        this.targetDirPath = targetDirPath.replace("\\", "/");
-        // 末尾を"/"にする
-        if (!this.targetDirPath.endsWith("/")) {
-            this.targetDirPath += "/";
-        }
+        initTarget(doc, targetDirPath);
     }
 
     public void execute() {
         traverse(doc);
 
-        String dst = convertURLtoPath(doc.baseUri());
-        if (!dst.endsWith(".html")) {
-            // 拡張子".html"が末尾に無い場合、末尾の"/"を全て削除して拡張子をつける
-            while (dst.endsWith("/")) {
-                dst = dst.substring(0, dst.length() - 1);
-            }
-            dst += ".html";
-        }
-
         // いずれかのダウンロードが失敗したとき、HTMLを出力しないようにするため、ここでダウンロード完了を待つ
-        for (var f : futures) {
+        while (!futures.isEmpty()) {
+            CompletableFuture<Void> f = futures.poll();
             f.join();
         }
 
-        File file = new File(dst);
+        File file = new File(targetHTMLPath);
         file.getParentFile().mkdirs();
         try {
             file.createNewFile();
@@ -79,7 +63,32 @@ public class Parser {
             throw new RuntimeException(e);
         }
 
-        System.out.println(String.format("Complete!\n  -> %s", dst));
+        System.out.println(String.format("Complete!\n  -> %s", targetHTMLPath));
+    }
+
+    private void initTarget(Document targetDoc, String targetDirPath) {
+        targetDirPath.replace("\\", "/");
+        // 末尾を"/"にする
+        if (!targetDirPath.endsWith("/")) {
+            targetDirPath += "/";
+        }
+        this.targetDirPath = targetDirPath;
+
+        this.doc = targetDoc;
+        if (doc == null) {
+            this.targetHTMLPath = "";
+            return;
+        }
+
+        String targetURI = convertURLtoPath(targetDoc.baseUri());
+        if (!targetURI.endsWith(".html")) {
+            // 拡張子".html"が末尾に無い場合、末尾の"/"を全て削除して拡張子をつける
+            if (targetURI.endsWith("/")) {
+                targetURI = targetURI.substring(0, targetURI.length() - 1);
+            }
+            targetURI += ".html";
+        }
+        this.targetHTMLPath = targetURI;
     }
 
     private void traverse(Node node) {
@@ -131,7 +140,8 @@ public class Parser {
 
     private String convertURLtoPath(String urlString) {
         // ファイルに使用できない":"と"http://"などに含まれる"//"を削除する
-        String pathString = urlString.replace(":", "").replace("//", "/");
+        // String pathString = urlString.replace(":", "").replace("//", "/");
+        String pathString = urlString.replace(":", "").replaceAll("[/]+", "/");
         // URLパラーメタを取り除く
         int idx = pathString.indexOf("?");
         if (idx > 0) {
@@ -142,10 +152,17 @@ public class Parser {
 
     private void download(String url, String dstPath) {
         try {
-            // ディレクトリを作成し、URL先のファイルを保存する
-            Response res = Jsoup.connect(url).ignoreContentType(true).execute();
+            // すでにファイルが存在する場合には無視する
             File file = new File(dstPath);
             file.getParentFile().mkdirs();
+            if (file.exists()) {
+                System.out.println(String.format("Skip: %s", url));
+                return;
+            }
+            file.createNewFile();
+
+            // ディレクトリを作成し、URL先のファイルを保存する
+            Response res = Jsoup.connect(url).ignoreContentType(true).execute();
             FileOutputStream outputStream = new FileOutputStream(file);
             outputStream.write(res.bodyAsBytes());
             outputStream.close();
