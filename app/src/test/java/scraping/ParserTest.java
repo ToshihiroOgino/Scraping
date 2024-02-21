@@ -61,8 +61,7 @@ public class ParserTest {
             final String testOut = "./out_test";
             File file = Paths.get(testHTML).toFile();
             Document doc = Jsoup.parse(file);
-            String targetDir = Paths.get(testOut).toAbsolutePath().toString();
-            Parser parser = new Parser(doc, targetDir);
+            Parser parser = new Parser(doc, testOut);
             parser.execute();
         } catch (IOException e) {
             throw new RuntimeException(e);

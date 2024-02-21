@@ -1,11 +1,9 @@
 package scraping;
 
-import java.nio.file.Paths;
-
 public class App {
     private static void parseYahoo() {
-        String targetURL = "https://www.yahoo.co.jp/";
-        String targetDir = Paths.get("./out").toAbsolutePath().toString();
+        final String targetURL = "https://www.yahoo.co.jp/";
+        final String targetDir = "./out";
         Parser parser = new Parser(targetURL, targetDir);
         parser.execute();
     }

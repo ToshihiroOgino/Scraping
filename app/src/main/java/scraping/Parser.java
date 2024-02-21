@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -23,7 +24,7 @@ public class Parser {
 
     /**
      * @param targetURL ダウンロードするWebページのURL
-     * @param targetDirPath 出力ディレクトリの絶対パス
+     * @param targetDirPath 出力ディレクトリのパス
      */
     public Parser(String targetURL, String targetDirPath) {
         try {
@@ -37,7 +38,7 @@ public class Parser {
 
     /**
      * @param doc Parse対象のDocument
-     * @param targetDirPath 出力ディレクトリの絶対パス
+     * @param targetDirPath 出力ディレクトリのパス
      */
     public Parser(Document doc, String targetDirPath) {
         initTarget(doc, targetDirPath);
@@ -67,6 +68,8 @@ public class Parser {
     }
 
     private void initTarget(Document targetDoc, String targetDirPath) {
+        // 絶対パスに変換する
+        targetDirPath = Paths.get(targetDirPath).toAbsolutePath().toString();
         targetDirPath.replace("\\", "/");
         // 末尾を"/"にする
         if (!targetDirPath.endsWith("/")) {
