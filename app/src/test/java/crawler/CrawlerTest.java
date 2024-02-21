@@ -1,4 +1,4 @@
-package scraping;
+package crawler;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,42 +11,47 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Paths;
 
-public class ParserTest {
+public class CrawlerTest {
     @Test
-    void parserCanConvertURL() {
+    void crawlerCanConvertURL() {
         Method method;
         try {
-            method = Parser.class.getDeclaredMethod("convertURLtoPath", String.class);
+            method = Crawler.class.getDeclaredMethod("convertURLtoPath", String.class);
             method.setAccessible(true);
         } catch (NoSuchMethodException | SecurityException e) {
             throw new RuntimeException(e);
         }
         Document nullDoc = null;
         try {
-            Parser instance1 = new Parser(nullDoc, "aaa");
+            String relativePath = "aaa";
+            String absolutePath = Paths.get(relativePath).toAbsolutePath().toString();
+
+            Crawler instance1 = new Crawler(nullDoc, relativePath);
             assertEquals(
                     (String) method.invoke(instance1,
                             "https://s.yimg.jp/images/edit/202401/1/aaa.jpg"),
-                    "aaa/https/s.yimg.jp/images/edit/202401/1/aaa.jpg");
+                    absolutePath + "/https/s.yimg.jp/images/edit/202401/1/aaa.jpg");
             assertEquals(
                     (String) method.invoke(instance1, "a///b"),
-                    "aaa/a/b");
+                    absolutePath + "/a/b");
             assertEquals(
                     (String) method.invoke(instance1, "a////b"),
-                    "aaa/a/b");
+                    absolutePath + "/a/b");
 
-            Parser instance2 = new Parser(nullDoc, "./a");
+            relativePath = "./a";
+            absolutePath = Paths.get(relativePath).toAbsolutePath().toString();
+            Crawler instance2 = new Crawler(nullDoc, relativePath);
             assertEquals(
                     (String) method.invoke(instance2, "b"),
-                    "./a/b");
+                    absolutePath + "/b");
 
-            Parser instance3 = new Parser(nullDoc, "./a/");
+            Crawler instance3 = new Crawler(nullDoc, "./a/");
             assertEquals(
                     (String) method.invoke(instance3, "b"),
-                    "./a/b");
+                    absolutePath + "/b");
             assertEquals(
                     (String) method.invoke(instance3, "https://aaa"),
-                    "./a/https/aaa");
+                    absolutePath + "/https/aaa");
 
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -61,8 +66,8 @@ public class ParserTest {
             final String testOut = "./out_test";
             File file = Paths.get(testHTML).toFile();
             Document doc = Jsoup.parse(file);
-            Parser parser = new Parser(doc, testOut);
-            parser.execute();
+            Crawler crawler = new Crawler(doc, testOut);
+            crawler.execute();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

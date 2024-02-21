@@ -1,4 +1,4 @@
-package scraping;
+package crawler;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,7 +16,7 @@ import org.jsoup.nodes.Node;
 
 import com.google.common.base.Charsets;
 
-public class Parser {
+public class Crawler {
     private Document doc;
     private String targetDirPath;
     private String targetHTMLPath;
@@ -26,7 +26,7 @@ public class Parser {
      * @param targetURL ダウンロードするWebページのURL
      * @param targetDirPath 出力ディレクトリのパス
      */
-    public Parser(String targetURL, String targetDirPath) {
+    public Crawler(String targetURL, String targetDirPath) {
         try {
             this.doc = Jsoup.connect(targetURL).get();
         } catch (IOException e) {
@@ -40,7 +40,7 @@ public class Parser {
      * @param doc Parse対象のDocument
      * @param targetDirPath 出力ディレクトリのパス
      */
-    public Parser(Document doc, String targetDirPath) {
+    public Crawler(Document doc, String targetDirPath) {
         initTarget(doc, targetDirPath);
     }
 
@@ -76,6 +76,8 @@ public class Parser {
             targetDirPath += "/";
         }
         this.targetDirPath = targetDirPath;
+
+        System.out.println(targetDirPath);
 
         this.doc = targetDoc;
         if (doc == null) {

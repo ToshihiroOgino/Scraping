@@ -1,11 +1,11 @@
-package scraping;
+package crawler;
 
 public class App {
     private static void parseYahoo() {
         final String targetURL = "https://www.yahoo.co.jp/";
         final String targetDir = "./out";
-        Parser parser = new Parser(targetURL, targetDir);
-        parser.execute();
+        Crawler crawler = new Crawler(targetURL, targetDir);
+        crawler.execute();
     }
 
     public static void main(String[] args) {
