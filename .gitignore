@@ -12,3 +12,4 @@ out_test
 
 *.code-workspace
 .vscode
+local

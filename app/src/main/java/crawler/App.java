@@ -4,7 +4,13 @@ public class App {
     private static void parseYahoo() {
         final String targetURL = "https://www.yahoo.co.jp/";
         final String targetDir = "./out";
-        Crawler crawler = new Crawler(targetURL, targetDir);
+        final int maxDepth = 2;
+
+        Crawler crawler = new Crawler();
+        crawler.setTargetURL(targetURL);
+        crawler.setDirPath(targetDir);
+        crawler.setMaxDepth(maxDepth);
+
         crawler.execute();
     }
 
