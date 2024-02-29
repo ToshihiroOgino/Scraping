@@ -30,17 +30,21 @@ class PageNodeVisiter implements NodeVisitor {
     @Override
     public void head(Node node, int depth) {
         futures.add(CompletableFuture.runAsync(() -> {
-            String[] targetAttrs = { "src", "srcset", "href" };
-
-            for (String attr : targetAttrs) {
-                String targetURL = node.attr(attr);
-                if (URLUtil.isURL(targetURL)) {
-                    // src先のファイルをダウンロードし、attributeをダウンロードしたファイルへのパスに置き換える
-                    Downloader downloader = new Downloader(baseURL, targetURL, dstDir, this.depthLeft - 1);
-                    downloader.execute();
-                    node.attr(attr, downloader.getDstFilePath().toAbsolutePath().toString());
-                }
-            }
+            checkNode(node);
         }));
+    }
+
+    private void checkNode(Node node) {
+        String[] targetAttrs = { "src", "srcset", "href" };
+
+        for (String attr : targetAttrs) {
+            String targetURL = node.attr(attr);
+            if (URLUtil.isURL(targetURL)) {
+                // src先のファイルをダウンロードし、attributeをダウンロードしたファイルへのパスに置き換える
+                Downloader downloader = new Downloader(baseURL, targetURL, dstDir, this.depthLeft - 1);
+                downloader.execute();
+                node.attr(attr, downloader.getDstFilePath().toAbsolutePath().toString());
+            }
+        }
     }
 }

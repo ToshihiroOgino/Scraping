@@ -44,6 +44,7 @@ public class Crawler {
 
         Downloader downloader = new Downloader(this.targetURL, this.targetDirPath, this.maxDepth);
         downloader.execute();
+        downloader.waitDownload();
         System.out.println(String.format("All download was completed. (%s)", downloader.getDstFilePath().toString()));
     }
 }

@@ -3,6 +3,9 @@ package crawler;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
@@ -21,6 +24,17 @@ class Downloader {
 
     public Path getDstFilePath() {
         return dstFilePath;
+    }
+
+    private static Queue<CompletableFuture<Void>> futures = new ArrayDeque<CompletableFuture<Void>>();
+
+    public void waitDownload() {
+        while (!futures.isEmpty()) {
+            var fut = futures.poll();
+            if (fut != null) {
+                fut.join();
+            }
+        }
     }
 
     /**
@@ -54,6 +68,12 @@ class Downloader {
     }
 
     public void execute() {
+        futures.add(CompletableFuture.runAsync(() -> {
+            download();
+        }));
+    }
+
+    private void download() {
         {
             // depthLeftが0以下のHTMLは保存しない
             String str = this.dstFilePath.toString();
@@ -93,7 +113,7 @@ class Downloader {
         if (this.isHTML) {
             if (depthLeft <= 0) {
                 // この関数の冒頭で弾いた拡張子以外のHTMLを見つけた場合にはログとして出力する
-                System.out.println(String.format("Unknown html skipped. (%s)", targetURL));
+                System.out.println(String.format("Skipped page unknown ext that are too deep. (%s)", targetURL));
                 return;
             }
             Document doc = WebPageLocalizer.localize(response, targetURL, dstDir, depthLeft);
