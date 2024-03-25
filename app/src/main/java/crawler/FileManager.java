@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.concurrent.locks.Lock;
@@ -11,8 +12,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
-
-import com.google.common.base.Charsets;
 
 public class FileManager {
     public static final Lock lock = new ReentrantLock();
@@ -43,20 +42,25 @@ public class FileManager {
      */
     public static boolean checkExistenceThenRegister(Path path) {
         lock.lock();
-        if (downloadedResources.contains(path)) {
-            lock.unlock();
-            return true;
+        boolean doesExists = downloadedResources.contains(path);
+        if (!doesExists) {
+            downloadedResources.add(path);
         }
+        lock.unlock();
+        return doesExists;
+    }
+
+    public static void register(Path path) {
+        lock.lock();
         downloadedResources.add(path);
         lock.unlock();
-        return false;
     }
 
     private static void createFile(Path path) throws IOException {
         File file = path.toFile();
         File parent = file.getParentFile();
-        boolean isExists = file.exists();
-        if (!isExists) {
+        boolean fileExists = file.exists();
+        if (!fileExists) {
             parent.mkdirs();
             file.createNewFile();
         }
@@ -65,7 +69,7 @@ public class FileManager {
     public static void save(Path path, Document doc) {
         try {
             createFile(path);
-            FileWriter fileWriter = new FileWriter(path.toFile(), Charsets.UTF_8);
+            FileWriter fileWriter = new FileWriter(path.toFile(), StandardCharsets.UTF_8);
             fileWriter.write(doc.html());
             fileWriter.close();
         } catch (IOException e) {

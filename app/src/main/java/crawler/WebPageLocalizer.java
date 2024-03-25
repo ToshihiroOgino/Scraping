@@ -19,9 +19,8 @@ class WebPageLocalizer {
 
         PageNodeVisiter visiter = new PageNodeVisiter(currentDepth, pageURL);
         doc.traverse(visiter);
-        visiter.waitLocalize();
 
-        System.out.println(String.format("Complete localize! (%s)", pageURL));
+        System.out.println(String.format("Complete localize: %s", pageURL));
         return doc;
     }
 }

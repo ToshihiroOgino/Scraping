@@ -1,6 +1,5 @@
 package crawler;
 
-import java.io.File;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.security.MessageDigest;

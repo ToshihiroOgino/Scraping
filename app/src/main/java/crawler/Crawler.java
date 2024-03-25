@@ -44,7 +44,9 @@ public class Crawler {
         }
 
         Path path = URLUtil.convertURLtoPath(targetURL);
+        FileManager.register(path);
         Downloader.download(targetURL, path, maxDepth);
+        Downloader.waitAllDownloads();
 
         System.out.println(String.format("All download was completed. (%s)", path.toString()));
     }

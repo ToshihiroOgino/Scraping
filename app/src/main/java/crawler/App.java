@@ -4,8 +4,9 @@ public class App {
     private static void parseYahoo() {
         final String targetURL = "https://www.yahoo.co.jp/";
         final String targetDir = "/home/toshihiro/Downloads/crawler";
-        FileManager.initDstDir(targetDir);
         final int maxDepth = 2;
+
+        FileManager.initDstDir(targetDir);
 
         Crawler crawler = new Crawler();
         crawler.setTargetURL(targetURL);

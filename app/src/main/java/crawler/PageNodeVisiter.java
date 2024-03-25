@@ -1,53 +1,43 @@
 package crawler;
 
 import java.nio.file.Path;
-import java.util.ArrayDeque;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 
 import org.jsoup.nodes.Node;
 import org.jsoup.select.NodeVisitor;
 
 class PageNodeVisiter implements NodeVisitor {
-    private final int depthLeft;
+    private final int currentDepth;
     private final String baseURL;
 
-    private Queue<CompletableFuture<Void>> futures = new ArrayDeque<CompletableFuture<Void>>();
-
-    public PageNodeVisiter(int depthLeft, String baseURL) {
-        this.depthLeft = depthLeft;
+    public PageNodeVisiter(int currentDepth, String baseURL) {
+        this.currentDepth = currentDepth;
         this.baseURL = baseURL;
-    }
-
-    public void waitLocalize() {
-        while (!futures.isEmpty()) {
-            var fut = futures.poll();
-            fut.join();
-        }
     }
 
     @Override
     public void head(Node node, int depth) {
-        futures.add(CompletableFuture.runAsync(() -> {
-            checkNode(node);
-        }));
+        localizeAttr(node, "src");
+        localizeAttr(node, "srcset");
+        if (node.normalName().equals("a")) {
+            if (currentDepth > 1) {
+                localizeAttr(node, "href");
+            }
+        } else {
+            localizeAttr(node, "href");
+        }
     }
 
-    private void checkNode(Node node) {
-        String[] targetAttrs = { "src", "srcset", "href" };
-
-        for (String attr : targetAttrs) {
-            String targetURL = node.attr(attr);
-            if (URLUtil.isURL(targetURL)) {
-                targetURL = URLUtil.formatURL(targetURL, baseURL);
-                Path dstFilePath = URLUtil.convertURLtoPath(targetURL);
-                // 初出のファイルのみをダウンロードする
-                if (!FileManager.checkExistenceThenRegister(dstFilePath)) {
-                    Downloader.download(targetURL, dstFilePath, depthLeft);
-                }
-                // attributeをダウンロードしたファイルへのパスに置き換える
-                node.attr(attr, dstFilePath.toString());
+    private void localizeAttr(Node node, String attrName) {
+        String targetURL = node.attr(attrName);
+        if (URLUtil.isURL(targetURL)) {
+            targetURL = URLUtil.formatURL(targetURL, baseURL);
+            Path dstFilePath = URLUtil.convertURLtoPath(targetURL);
+            // 初出のファイルのみをダウンロードする
+            if (!FileManager.checkExistenceThenRegister(dstFilePath)) {
+                Downloader.download(targetURL, dstFilePath, currentDepth - 1);
             }
+            // attributeをダウンロードしたファイルへのパスに置き換える
+            node.attr(attrName, dstFilePath.toString());
         }
     }
 }
