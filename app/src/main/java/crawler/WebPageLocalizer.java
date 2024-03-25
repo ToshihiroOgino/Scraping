@@ -1,12 +1,14 @@
 package crawler;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
 
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 
 class WebPageLocalizer {
-    public static Document localize(Response response, String pageURL, String dstDir, int currentDepth) {
+    public static List<String> localizeAndSave(Response response, String pageURL, Path dstFilePath, int currentDepth) {
         System.out.println(String.format("Localizing %s...", pageURL));
 
         Document doc;
@@ -21,6 +23,9 @@ class WebPageLocalizer {
         doc.traverse(visiter);
 
         System.out.println(String.format("Complete localize: %s", pageURL));
-        return doc;
+
+        FileManager.save(dstFilePath, doc);
+
+        return visiter.urls;
     }
 }

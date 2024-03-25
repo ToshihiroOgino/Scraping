@@ -5,6 +5,18 @@ public class App {
         final String targetURL = "https://www.yahoo.co.jp/";
         final String targetDir = "/home/toshihiro/Downloads/crawler";
         final int maxDepth = 2;
+        // ダウンロードの最大同時実行数
+        final int maxPermits = 4;
+
+        // maxDepth = 2
+        // maxPermits = 4
+        // exec time -> 175 sec
+
+        // maxDepth = 2
+        // maxPermits = 1024
+        // exec time -> 71 sec
+
+        Downloader.initSemaphore(maxPermits);
 
         FileManager.initDstDir(targetDir);
 

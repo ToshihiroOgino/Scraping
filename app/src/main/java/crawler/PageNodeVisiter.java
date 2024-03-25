@@ -1,6 +1,8 @@
 package crawler;
 
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.jsoup.nodes.Node;
 import org.jsoup.select.NodeVisitor;
@@ -8,6 +10,8 @@ import org.jsoup.select.NodeVisitor;
 class PageNodeVisiter implements NodeVisitor {
     private final int currentDepth;
     private final String baseURL;
+
+    public final List<String> urls = new LinkedList<String>();
 
     public PageNodeVisiter(int currentDepth, String baseURL) {
         this.currentDepth = currentDepth;
@@ -34,7 +38,8 @@ class PageNodeVisiter implements NodeVisitor {
             Path dstFilePath = URLUtil.convertURLtoPath(targetURL);
             // 初出のファイルのみをダウンロードする
             if (!FileManager.checkExistenceThenRegister(dstFilePath)) {
-                Downloader.download(targetURL, dstFilePath, currentDepth - 1);
+                urls.add(targetURL);
+                // Downloader.download(targetURL, dstFilePath, currentDepth - 1);
             }
             // attributeをダウンロードしたファイルへのパスに置き換える
             node.attr(attrName, dstFilePath.toString());
