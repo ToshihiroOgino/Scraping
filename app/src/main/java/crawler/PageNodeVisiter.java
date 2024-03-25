@@ -1,5 +1,6 @@
 package crawler;
 
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -8,14 +9,12 @@ import org.jsoup.nodes.Node;
 import org.jsoup.select.NodeVisitor;
 
 class PageNodeVisiter implements NodeVisitor {
-    private final String dstDir;
     private final int depthLeft;
     private final String baseURL;
 
     private Queue<CompletableFuture<Void>> futures = new ArrayDeque<CompletableFuture<Void>>();
 
-    public PageNodeVisiter(String dstDir, int depthLeft, String baseURL) {
-        this.dstDir = dstDir;
+    public PageNodeVisiter(int depthLeft, String baseURL) {
         this.depthLeft = depthLeft;
         this.baseURL = baseURL;
     }
@@ -40,10 +39,14 @@ class PageNodeVisiter implements NodeVisitor {
         for (String attr : targetAttrs) {
             String targetURL = node.attr(attr);
             if (URLUtil.isURL(targetURL)) {
-                // src先のファイルをダウンロードし、attributeをダウンロードしたファイルへのパスに置き換える
-                Downloader downloader = new Downloader(baseURL, targetURL, dstDir, this.depthLeft - 1);
-                downloader.execute();
-                node.attr(attr, downloader.getDstFilePath().toAbsolutePath().toString());
+                targetURL = URLUtil.formatURL(targetURL, baseURL);
+                Path dstFilePath = URLUtil.convertURLtoPath(targetURL);
+                // 初出のファイルのみをダウンロードする
+                if (!FileManager.checkExistenceThenRegister(dstFilePath)) {
+                    Downloader.download(targetURL, dstFilePath, depthLeft);
+                }
+                // attributeをダウンロードしたファイルへのパスに置き換える
+                node.attr(attr, dstFilePath.toString());
             }
         }
     }

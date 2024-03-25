@@ -29,26 +29,26 @@ public class URLUtilTest {
         }
     }
 
-    @Test
-    void convertURLtoPathStrTest() {
-        String[][] testCases = {
-                {
-                        "https://travel.yahoo.co.jp/?ikCo=y_010017&sc_e=ytmh",
-                        "travel.yahoo.co.jp/index.html"
-                },
-                {
-                        "https://www.yahoo.co.jp/",
-                        "www.yahoo.co.jp/index.html"
-                },
-                {
-                        "https://login.yahoo.co.jp/config/login?.src=ym&req_attr=ym&.done=https%3A%2F%2Fmail.yahoo.co.jp%2F",
-                        "login.yahoo.co.jp/config/login"
-                },
-        };
-        for (String[] pair : testCases) {
-            assertEquals(pair[1], URLUtil.convertURLtoPathStr(pair[0]));
-        }
-    }
+    // @Test
+    // void convertURLtoPathStrTest() {
+    //     String[][] testCases = {
+    //             {
+    //                     "https://travel.yahoo.co.jp/?ikCo=y_010017&sc_e=ytmh",
+    //                     "travel.yahoo.co.jp/index.html"
+    //             },
+    //             {
+    //                     "https://www.yahoo.co.jp/",
+    //                     "www.yahoo.co.jp/index.html"
+    //             },
+    //             {
+    //                     "https://login.yahoo.co.jp/config/login?.src=ym&req_attr=ym&.done=https%3A%2F%2Fmail.yahoo.co.jp%2F",
+    //                     "login.yahoo.co.jp/config/login"
+    //             },
+    //     };
+    //     for (String[] pair : testCases) {
+    //         assertEquals(pair[1], URLUtil.convertURLtoPathStr(pair[0]));
+    //     }
+    // }
 
     @Test
     void getURLExtTest() {

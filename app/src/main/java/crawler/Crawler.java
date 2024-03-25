@@ -1,5 +1,6 @@
 package crawler;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Crawler {
@@ -42,9 +43,9 @@ public class Crawler {
             return;
         }
 
-        Downloader downloader = new Downloader(this.targetURL, this.targetDirPath, this.maxDepth);
-        downloader.execute();
-        downloader.waitDownload();
-        System.out.println(String.format("All download was completed. (%s)", downloader.getDstFilePath().toString()));
+        Path path = URLUtil.convertURLtoPath(targetURL);
+        Downloader.download(targetURL, path, maxDepth);
+
+        System.out.println(String.format("All download was completed. (%s)", path.toString()));
     }
 }

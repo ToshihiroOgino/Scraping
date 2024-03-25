@@ -17,7 +17,7 @@ class WebPageLocalizer {
             return null;
         }
 
-        PageNodeVisiter visiter = new PageNodeVisiter(dstDir, currentDepth, pageURL);
+        PageNodeVisiter visiter = new PageNodeVisiter(currentDepth, pageURL);
         doc.traverse(visiter);
         visiter.waitLocalize();
 

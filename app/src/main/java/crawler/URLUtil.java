@@ -1,6 +1,8 @@
 package crawler;
 
+import java.io.File;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -46,50 +48,50 @@ class URLUtil {
         return host;
     }
 
-    public static String convertURLtoPathStr(String url) {
+    public static Path convertURLtoPath(String url) {
         // クエリを削除
-        String path = removeQuery(url);
+        url = removeQuery(url);
 
-        if (path.startsWith("http") | path.startsWith("//")) {
+        if (url.startsWith("http") || url.startsWith("//")) {
             // https://や//で始まるURLはそれらを削除する
-            int idx = path.indexOf("//");
-            path = path.substring(idx + 2);
+            int idx = url.indexOf("//");
+            url = url.substring(idx + 2);
 
             // ホスト名が末尾のURLには/を追加する
-            String host = getHostName(path);
-            if (path.endsWith(host)) {
-                path += "/";
+            String host = getHostName(url);
+            if (url.endsWith(host)) {
+                url += "/";
             }
-        } else if (path.startsWith("/")) {
+        } else if (url.startsWith("/")) {
             // 相対URLの場合、冒頭の/を削除する
-            path = path.substring(1);
+            url = url.substring(1);
         }
 
         // 拡張子を抽出
-        final String ext = getURLExt(path);
+        final String ext = getURLExt(url);
 
         // urlの文字数が長すぎる場合にはハッシュ化して短縮する
-        if (path.length() > 230) {
+        if (url.length() > 230) {
             try {
                 MessageDigest md5 = MessageDigest.getInstance("MD5");
-                byte[] hash = md5.digest(path.getBytes());
+                byte[] hash = md5.digest(url.getBytes());
                 // 拡張子は残す
-                path = String.format("longName/%020x%s", new BigInteger(hash), ext);
+                url = String.format("longName/%020x%s", new BigInteger(hash), ext);
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        if (path.endsWith("/")) {
-            // 末尾の/を削除する
-            // url = url.replaceAll("/+$", "");
-            path += "index.html";
+        if (url.endsWith("/")) {
+            url += "index.html";
         } else if (ext == "") {
-            path += "/index.html";
-        } else if (path.endsWith(".ashx") || path.endsWith(".asp")) {
+            url += "/index.html";
+        } else if (url.endsWith(".ashx") || url.endsWith(".asp")) {
             // ASP NET系の拡張子をHTMLに変換する
-            path += ".html";
+            url += ".html";
         }
+
+        Path path = Path.of(FileManager.getDstDir() + url);
 
         return path;
     }
