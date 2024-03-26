@@ -3,10 +3,10 @@ package crawler;
 public class App {
     private static void parseYahoo() {
         final String targetURL = "https://www.yahoo.co.jp/";
-        final String targetDir = "/home/toshihiro/Downloads/crawler";
+        final String targetDir = "./out";
         final int maxDepth = 2;
         // ダウンロードの最大同時実行数
-        final int maxPermits = 4;
+        final int maxPermits = 1024;
 
         // maxDepth = 2
         // maxPermits = 4

@@ -37,7 +37,7 @@ class Downloader {
             }
             int depthLeft = dto.depthLeft();
             dto.requirements().forEach(url -> {
-                Path path = URLUtil.convertURLtoPath(FileManager.getDstDir() + url);
+                Path path = URLUtil.convertURLtoPath(url);
                 Downloader.download(url, path, depthLeft);
             });
         }
